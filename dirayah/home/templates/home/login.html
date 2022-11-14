@@ -1,0 +1,42 @@
+{% extends "home/temp.html" %}
+
+{% block content %} 
+
+    {% load crispy_forms_tags %} 
+    <div class="container py-5">
+        <h1>Register</h1>
+        <form method="POST">
+            {% csrf_token %}
+            {{ login_form|crispy }}                    
+            <button class="btn btn-primary" type="submit">Login</button>
+        </form>
+        <p class="text-center">If you don't have an account, <a href="/register">register</a> instead.</p>
+    </div>
+
+    <script>
+        const form = document.querySelector('form');
+        document.addEventListener('DOMContentLoaded', () => {
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                fetch('{% url 'login' %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        'username': form.username.value,
+                        'password': form.password.value
+                    })
+                }).then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.message.includes('success')) {
+                        window.location.href = '{% url 'index' %}';
+                    }
+                });
+            }
+        });
+    </script>
+    
+{% endblock %}

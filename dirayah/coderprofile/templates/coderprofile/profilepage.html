@@ -1,0 +1,58 @@
+<html>
+    <head>
+        <style>
+            .c1 {
+                border: 2;
+                background-color:cadetblue;
+                background-size:50%;
+                color: black;
+                height: 100%;
+                font-size: 10px;
+                Padding:100px;
+            }
+            span{
+                font-size:30px;
+                Padding: 5px;
+                font-weight:3px;
+                color: white;
+                border:2px;
+                border-color:black;
+            }
+        </style>
+    </head>
+    <boby>
+        {% if user is not None%}
+            <div class="c1">
+                <h1> <span> Username: </span> {{user.username}}</h1>
+                <h1> <span> Email: </span> {{user.email}} </h1>
+                <h1> <span> Paymethod: </span> {{profile.paymethod}} </h1>
+                <h1> 
+                    <span> Answers: </span> <br>
+                    <ul>
+                    {% for p in profile.answers.all %}
+                        <li> {{p}} </li>
+                    {%endfor%}
+                    <ul>
+
+                </h1> 
+                <h1>
+                    <span> Problems Solved: </span> <br>
+                    <ul>
+                    {% for p in profile.problems_solved.all %}
+                        <li> {{p}} </li>
+                    {%endfor%}
+                    <ul>
+                </h1>
+                <h1> 
+                    <span> Recommendations: </span> <br>
+                <ul>
+                    {% for p in profile.recommendations.all %}
+                        <li> {{p}} </li>
+                    {%endfor%}
+                    <ul> 
+                </h1>
+            </div>
+        {%endif%}
+
+    </body>
+</html>
