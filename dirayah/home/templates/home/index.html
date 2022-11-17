@@ -1,1 +1,36 @@
-<h1>hi</h1>
+<html>
+    <head>
+        <style>
+            .C1{
+                background:black;
+                background-size: 50%;
+                padding:5em;
+                display: flex;
+                justify-content: center;
+                color: white;
+                }
+            h1{
+                color: white;
+            }
+        </style>
+    </head>
+    <body >
+        <div CLASS="C1">
+            <span> <h1> Welcome </h1></span>
+        </div>
+        <div class ="C1" >
+            <ol>
+                {% for x in answers.all %}
+                    <i> {{ x }} </i>
+                {% endfor %}
+            </ol>
+        </div>
+        <div class ="C1" >
+            <ol>
+                {% for x in recommendations.all %}
+                    <i> {{ x }} </i>
+                {% endfor %}
+            </ol>
+        </div>
+    </body>
+</html>
