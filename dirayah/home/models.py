@@ -24,10 +24,11 @@ class Problem(models.Model):
     answer = models.ForeignKey('Answer', on_delete=models.CASCADE, null=True, blank=True, related_name='official_answer')
 
     def __str__(self):
-        return self.title
+        return self.title + " " + str(self.id)
 
 class Answer(models.Model):
     answer = models.CharField(max_length=500)
+    video_link = models.CharField(max_length=500, null=True, blank=True)
     id = models.AutoField(primary_key=True)
     problem = models.ForeignKey('Problem', on_delete=models.CASCADE, related_name='problem')
     user = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='answerer')

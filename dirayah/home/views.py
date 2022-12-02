@@ -6,25 +6,26 @@ from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 from django.contrib import messages
 from .forms import NewUserForm, LoginForm
-from .models import UserProfile, User
+from .models import UserProfile, User, Problem
 
 # Create your views here.
 
 # Home Page
 def index(request):
     if request.user.is_authenticated:
+        recommendatins = recommend(request)
         answers=UserProfile.objects.get(user=request.user).answers
-        recommendations=UserProfile.objects.get(user=request.user).recommendations
         return render(request, 'home/index.html',
         {
             "answers":answers,
-            "recommendations":recommendations,
+            "recommendations":recommendatins,
         }
         )
-    return render(request, 'home/index.html')
+    return render(request, 'home/index.html' )
 
 # Authenticate user on login
 def login_view(request):
+    form = LoginForm()
     if request.user.is_authenticated:
         return redirect('index')
     if request.method == 'POST':
@@ -70,3 +71,29 @@ def logout_view(request):
     logout(request)
     messages.info(request, "Logged out successfully!")
     return redirect("index")
+
+# recommendatin system 
+def recommend(request):
+    if request.method == "GET":
+        user = request.user
+        profile = UserProfile.objects.get(user=user)
+
+        # get the answered questions from the user
+        answers = profile.problems_solved.all()
+
+        # loop through the solved question to get the average defficulty
+        difficulty = 0
+        for answer in answers:
+            difficulty += answer.difficulty
+        difficulty /= len(answers)
+
+        # get all the questions in the database that are not answered by the user and have a difficulty less than the average difficulty
+        questions = Problem.objects.exclude(id__in=answers).filter(difficulty__lte=difficulty)
+
+        # get the top 5 questions
+        questions = questions[:5]
+
+        # add the questions to the user profile
+        profile.recommendations.set(questions)
+
+        return questions
