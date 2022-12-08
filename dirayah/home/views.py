@@ -14,11 +14,15 @@ from .models import UserProfile, User, Problem
 def index(request):
     if request.user.is_authenticated:
         recommendatins = recommend(request)
-        answers=UserProfile.objects.get(user=request.user).answers
+        uer = UserProfile.objects.get(user=request.user)
+        answers=uer.answers.all()
+        solved = uer.problems_solved.all()
+
         return render(request, 'home/index.html',
         {
             "answers":answers,
             "recommendations":recommendatins,
+            "solved":solved
         }
         )
     return render(request, 'home/index.html' )
@@ -85,7 +89,8 @@ def recommend(request):
         difficulty = 0
         for answer in answers:
             difficulty += answer.difficulty
-        difficulty /= len(answers)
+        if len(answers) > 0:
+            difficulty /= len(answers)
 
         # get all the questions in the database that are not answered by the user and have a difficulty less than the average difficulty
         questions = Problem.objects.exclude(id__in=answers).filter(difficulty__lte=difficulty)

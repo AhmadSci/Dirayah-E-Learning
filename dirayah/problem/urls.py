@@ -8,6 +8,7 @@ urlpatterns = [
     # unique id for each problem
     path('<int:problem_id>', views.problem, name='problem'),
     path('compile', views.compile, name='compile'),
+    path('comment/<int:problem_id>', views.comment, name='comment'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

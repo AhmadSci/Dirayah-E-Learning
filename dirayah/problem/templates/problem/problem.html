@@ -7,33 +7,105 @@
         <h1>{{ message }}</h1>
     {% endif %}
 
+    
     <div class="container py-5">
-        <h1> {{problem.title}} </h1>
-        <h2> {{problem.description}} </h2>
-        {% comment %} <a href="{{problem.answer.video_link}}"> Watch it </a> {% endcomment %}
-        <iframe width="1080" height="720" src="{{problem.answer.video_link}}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        <form method="POST">
-            {% csrf_token %}
-            {{form|crispy}}
-            <button class="btn btn-primary" type="submit"> Submit</button>                   
-        </form>
-        <textarea id="response" disabled rows="10" cols="100"></textarea>
-        <div> 
+        <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">{{problem.title}}</h5>
+              <p class="card-text">{{problem.description}}</p>
+            </div>
+            <iframe width="1080" height="720" class="card-img-bottom" src="{{problem.answer.video_link}}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+
+        <section style="background-color: #3A3B3C;">
+            <div class="container my-5 py-5 text-dark">
+              <div class="row d-flex justify-content-center">
+                <div class="col-md-10 col-lg-8 col-xl-6">
+                  <div class="card">
+                    <div class="card-body p-4">
+                      <div class="d-flex flex-start w-100">
+                        <div class="w-100">
+                          <h5>Write Code Here</h5>
+                        <form method="POST">
+                          <div class="form-outline">
+                            {% csrf_token %}
+                            {{form.code|as_crispy_field}}
+                            <label class="form-label" for="textAreaExample">Output</label>
+                            <textarea class="form-control" id="response" rows="4" disabled></textarea>
+
+                          </div>
+                          <div class="d-flex justify-content-between mt-3">
+                            <button type="submit" class="btn btn-success">
+                              Run
+                            </button>
+                            </form>
+                            
+                            <button type="button" class="btn btn-danger">
+                              Submit
+                              <i class="fas fa-long-arrow-alt-right ms-1"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+            
+        {% comment %} <div> 
             {{problem.answer.answer}}
         </div>
-        {% for x in problem.comments.all %}
-        
-        
-        <p class="text-center">{{x.comment}}, {{x.user.user.username}}</p>
-        <br>
-        
-        {% endfor %}
+         {% endcomment %}
+        <div class="card-footer py-3 border-0" style="background-color: #f8f9fa;">
+            <div class="d-flex flex-start w-100">
+                <div class="form-outline w-100">
+                <form method="POST" id = "commentform">
+                    {% csrf_token %}
+                    {{comment.comment|as_crispy_field}}
+              </div>
+            </div>
+            <div class="float-end mt-2 pt-1">
+              <button type="submit" class="btn btn-primary btn-sm">
+                Post comment
+              </button>
+            </form>
+            </div>
+          </div>
+          <section id = "commentsection">
+          {% for x in problem.comments.all %}
+  
+          <div class="card" id = "comment{{x.id}}">
+              <div class="card-body">
+                <div class="d-flex flex-start align-items-center">
+                  <div>
+                    <h6 class="fw-bold text-primary mb-1">
+                      <a href = "{% url 'user_profile' x.user.user.username%}">{{x.user.user.username}}</a>
+                    </h6>
+                    {% comment %} <p class="text-muted small mb-0">
+                      Shared publicly - Jan 2020
+                    </p> {% endcomment %}
+                  </div>
+                </div>
+    
+                <p class="mt-3 mb-4 pb-2">
+                  {{x.comment}}
+                </p>
+              </div>
+            </div>
+          
+          {% endfor %}
+            </section>
+        </div>
     </div>
 
     <script>
         const input = document.querySelector('#response');
         const form = document.querySelector('form');
         const codearea = document.querySelector('#code');
+        const commmentform = document.querySelector('#commentform');
+        const commentsection = document.querySelector('#commentsection');
 
         // if user presses tab key inside the textarea, prevent the default action of tabbing out of the textarea and instead insert a tab character
         codearea.addEventListener('keydown', function(e) {
@@ -60,6 +132,45 @@
                 }).then(response => response.json())
                 .then(data => {
                     input.value = data.output;
+                });
+            }
+
+            commentform.onsubmit = (e) => {
+                e.preventDefault();
+                fetch('{% url 'comment' problem.id %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        'comment' : commentform.comment.value
+                    })
+                }).then(response => response.json())
+                .then(data => {
+                    var uer = '{{request.user.username}}';
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.id = 'comment' + data.id;
+                    div.innerHTML = `
+                    <div class="card-body">
+                    <div class="d-flex flex-start align-items-center">
+                      <div>
+                        <h6 class="fw-bold text-primary mb-1">
+                          ${uer}
+                        </h6>
+                        {% comment %} <p class="text-muted small mb-0">
+                          Shared publicly - Jan 2020
+                        </p> {% endcomment %}
+                      </div>
+                    </div>
+            
+                    <p class="mt-3 mb-4 pb-2">
+                      ${data.comment}
+                    </p>
+                    </div>
+                    `;
+                    commentsection.appendChild(div);
                 });
             }
         });
